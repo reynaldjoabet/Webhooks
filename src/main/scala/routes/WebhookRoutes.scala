@@ -12,7 +12,8 @@ import org.http4s.dsl.Http4sDsl
 import org.typelevel.log4cats.Logger
 import services.*
 
-final case class WebhookRoutes[F[_]: Async: Logger](service: EventService[F]) extends Http4sDsl[F] {
+final case class WebhookRoutes[F[_]: Async: Logger](val service: EventService[F])
+    extends Http4sDsl[F] {
 
   implicit val createWhDecoder: EntityDecoder[F, CreateWebhookRequest] =
     jsonOf[F, CreateWebhookRequest]

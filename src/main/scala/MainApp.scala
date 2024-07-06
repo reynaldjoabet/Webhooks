@@ -4,37 +4,41 @@ import fs2.kafka.consumer.KafkaConsumeChunk.CommitNow
 import com.comcast.ip4s
 import com.comcast.ip4s.Literals.*
 import config.*
-import config.syntax.loadF
+import config.syntax.*
 import doobie.util.transactor.Transactor
 import org.http4s.ember.client.*
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
+import org.http4s.syntax.KleisliSyntax
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import pureconfig.ConfigSource
 import repositories.WebhookRepoLive
+import routes.*
 import services.*
 
-object MainApp {
+object MainApp extends IOApp.Simple {
 
-  implicit val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.getLogger[IO]
+  implicit private val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.getLogger[IO]
 
-  def makeServer(config: ServerConfig): Resource[IO, Server] = EmberServerBuilder
-    .default[IO]
-    // .withPort(ip4s.Port.fromInt(config.port).getOrElse(ip4s.port"8080"))
-    .withPort(ip4s.Port.fromInt(config.port).get)
-    .withHost(ip4s.Host.fromString(config.host).get)
-    .build
+  def makeServer(config: ServerConfig, service: EventService[IO]): Resource[IO, Server] =
+    EmberServerBuilder
+      .default[IO]
+      // .withPort(ip4s.Port.fromInt(config.port).getOrElse(ip4s.port"8080"))
+      .withPort(ip4s.Port.fromInt(config.port).get)
+      .withHost(ip4s.Host.fromString(config.host).get)
+      .withHttpApp(WebhookRoutes(service).routes.orNotFound)
+      .build
 
   def makeClient = EmberClientBuilder.default[IO].build
 
   private def init(pathOpt: Option[String]): Resource[IO, (ConsumerService[IO], Server)] = for {
     config        <- ConfigSource.default.loadF[IO, AppConfig].toResource
     client        <- makeClient
-    webhookRepo   <- WebhookRepoLive.resource[IO](makeTransactor(config.transactor))
+    webhookRepo   <- WebhookRepoLive.resource[IO](makeTransactor(config.transactorConfig))
     eventService  <- EventService.resource[IO](webhookRepo, client)
-    consumerEvent <- ConsumerService.resource[IO](config.consumer, eventService)
-    server        <- makeServer(config.server)
+    consumerEvent <- ConsumerService.resource[IO](config.consumerConfig, eventService)
+    server        <- makeServer(config.serverConfig, eventService)
   } yield (consumerEvent, server)
 
   private def makeTransactor(config: TransactorConfig): Transactor[IO] { type A = Unit } =
@@ -45,5 +49,7 @@ object MainApp {
       "",         // password
       None
     )
+
+  override def run: IO[Unit] = init(None).use { case (service, server) => service.consumeEvent() }
 
 }

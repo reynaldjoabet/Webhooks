@@ -10,13 +10,13 @@ import doobie.Transactor
 
 trait WebhookRepo[F[_]] {
 
-  def get(id: Long): F[Option[Webhook]]
+  def get(id: Long): F[Option[Webhook]] // read
 
-  def put(webhookData: WebhookData): F[Unit]
+  def create(webhookData: WebhookData): F[Unit]
 
   def remove(id: Long): F[Unit]
 
-  def updateWebhook(id: Long, newEventType: String, newPath: String): F[Unit]
+  def update(id: Long, newEventType: String, newPath: String): F[Unit]
 
   def getAllByMsgType(msgType: String): F[List[Webhook]]
 

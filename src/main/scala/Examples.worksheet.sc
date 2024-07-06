@@ -185,7 +185,7 @@ sys.env("JAVA_HOME")
 //sys.env("TERM")
 ConfigSource.defaultApplication.load[AppConfig]
 
-ConfigSource.defaultApplication.at("consumer").load[ConsumerConfig].merge // make sure the names are in kebab case (bootstrap-servers)in the application.conf file
+ConfigSource.defaultApplication.at("consumer").load[KafkaConsumerConfig].merge // make sure the names are in kebab case (bootstrap-servers)in the application.conf file
 
 ConfigSource.defaultApplication.at("transactor").load[TransactorConfig]
 

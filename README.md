@@ -187,3 +187,31 @@ trait Encoder[A] extends Serializable { self =>
 
 
 ```
+
+`def consumeEvent: F[Unit]`
+
+This is a parameterless method that does not take any arguments and is generally used for properties or constants that are stable and should not perform side effects.
+
+It is called without parentheses, like accessing a value
+
+It is often used for methods that are idempotent and do not have side effects, resembling a field or property
+
+`def consumeEvent(): F[Unit]`
+
+
+This is a parameterless method with an empty parameter list and is generally used for methods that may have side effects or perform some actions.
+
+It is called with parentheses, indicating that it performs some computation or action
+
+It is typically used for methods that perform operations, computations, or have side effects.
+
+
+```scala
+def currentTime: String = java.time.Instant.now().toString
+
+// Usage
+val time = currentTime
+println(time)
+```
+
+Here, `currentTime` might be better defined with parentheses because it performs an action (getting the current time), but it's used without parentheses, which suggests it is a stable value

@@ -6,12 +6,12 @@ import ciris.*
 import pureconfig.generic.derivation.default.*
 import pureconfig.ConfigReader
 
-final case class ConsumerConfig(
+final case class KafkaConsumerConfig(
   bootstrapServers: List[String],
   groupId: String,
   clientId: String,
   closeTimeout: FiniteDuration,
-  topicIds: List[String]
+  topics: List[String]
 ) derives ConfigReader
 
 object ConsumerConfig {

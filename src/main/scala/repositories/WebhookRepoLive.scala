@@ -16,7 +16,7 @@ final case class WebhookRepoLive[F[_]: Async](xa: Transactor[F]) extends Webhook
   def get(id: Long): F[Option[Webhook]] =
     sql"SELECT * FROM Webhooks WHERE id = $id".query[Webhook].option.transact(xa)
 
-  def put(webhookData: WebhookData): F[Unit] =
+  def create(webhookData: WebhookData): F[Unit] =
     sql"INSERT INTO Webhooks (eventtype, path) VALUES (${webhookData.eventType}, ${webhookData.path})"
       .update
       .run
@@ -26,7 +26,7 @@ final case class WebhookRepoLive[F[_]: Async](xa: Transactor[F]) extends Webhook
   def getAllByMsgType(eventType: String): F[List[Webhook]] =
     sql"SELECT * FROM Webhooks WHERE eventtype = $eventType".query[Webhook].to[List].transact(xa)
 
-  def updateWebhook(id: Long, newEventType: String, newPath: String): F[Unit] =
+  def update(id: Long, newEventType: String, newPath: String): F[Unit] =
     sql"UPDATE Webhooks SET eventtype = $newEventType, path = $newPath WHERE id = $id"
       .update
       .run

@@ -5,9 +5,9 @@ import pureconfig.generic.derivation.default.*
 import pureconfig.ConfigReader
 
 final case class AppConfig(
-  consumer: ConsumerConfig,
-  transactor: TransactorConfig,
-  server: ServerConfig
+  consumerConfig: KafkaConsumerConfig,
+  transactorConfig: TransactorConfig,
+  serverConfig: ServerConfig,
+  producerConfig: KafkaProducerConfig,
+  emberConfig: EmberConfig
 ) derives ConfigReader
-
-object AppConfig {}

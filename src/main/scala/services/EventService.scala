@@ -31,8 +31,8 @@ trait EventService[F[_]] {
 
 //One of the following imports might fix the problem:
 //import org.http4s.implicits.uri
-import org.http4s.syntax.all.uri
-//import org.http4s.syntax.literals.uri
+//import org.http4s.syntax.all.uri
+import org.http4s.syntax.literals.uri
 
 object EventService {
 
@@ -65,7 +65,7 @@ object EventService {
         .apply(event, Uri.unsafeFromString(path), `Content-Type`(MediaType.application.json))
       val request2 = Request[F](
         method = Method.POST,
-        uri = uri"http./posts"
+        uri = Uri.unsafeFromString(path) // uri"$path"
       ).withEntity(event.asJson).withContentType(`Content-Type`(MediaType.application.json))
 
       client
@@ -80,11 +80,11 @@ object EventService {
 
     override def create(eventType: String, path: String): F[Unit] = {
       val webhook = WebhookData(eventType, path)
-      webhooks.put(webhook)
+      webhooks.create(webhook)
     }
 
     override def update(id: Long, newEventType: String, newPath: String): F[Unit] =
-      webhooks.updateWebhook(id, newEventType, newPath)
+      webhooks.update(id, newEventType, newPath)
 
     override def delete(id: Long): F[Unit] =
       webhooks.remove(id)

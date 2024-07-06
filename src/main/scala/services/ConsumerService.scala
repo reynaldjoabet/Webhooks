@@ -10,7 +10,7 @@ import cats.syntax.all.*
 import fs2.kafka.*
 import fs2.kafka.KafkaConsumer
 
-import config.ConsumerConfig
+import config.KafkaConsumerConfig
 import domain.*
 import io.circe.jawn.decodeByteArray
 import io.circe.parser.*
@@ -20,18 +20,18 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 
 trait ConsumerService[F[_]] {
-  def consumeEvent: F[Unit]
+  def consumeEvent(): F[Unit]
 }
 
 object ConsumerService {
 
   def resource[F[_]: Async: Logger](
-    config: ConsumerConfig,
+    config: KafkaConsumerConfig,
     eventService: EventService[F]
   ): Resource[F, ConsumerService[F]] = make[F](config, eventService).toResource
 
   def make[F[_]: Async: Logger](
-    config: ConsumerConfig,
+    config: KafkaConsumerConfig,
     eventService: EventService[F]
   ): F[ConsumerService[F]] = new ConsumerService[F] {
 
@@ -45,8 +45,8 @@ object ConsumerService {
         .withClientId(config.clientId)
         .withCloseTimeout(config.closeTimeout)
 
-    override def consumeEvent: F[Unit] =
-      consumeAndProcess[F](settings, config.topicIds, eventService)
+    override def consumeEvent(): F[Unit] =
+      consumeAndProcess[F](settings, config.topics, eventService)
   }.pure[F]
 
   private def consumeAndProcess[F[_]: Async](
