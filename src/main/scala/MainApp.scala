@@ -6,6 +6,8 @@ import com.comcast.ip4s.Literals.*
 import config.*
 import config.syntax.*
 import doobie.util.transactor.Transactor
+import http.routes.WebhookRoutes
+import org.http4s.client.Client
 import org.http4s.ember.client.*
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
@@ -14,7 +16,6 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import pureconfig.ConfigSource
 import repositories.WebhookRepoLive
-import routes.*
 import services.*
 
 object MainApp extends IOApp.Simple {
@@ -25,12 +26,20 @@ object MainApp extends IOApp.Simple {
     EmberServerBuilder
       .default[IO]
       // .withPort(ip4s.Port.fromInt(config.port).getOrElse(ip4s.port"8080"))
-      .withPort(ip4s.Port.fromInt(config.port).get)
+      // .withPort(ip4s.Port.fromInt(config.port).get)
       .withHost(ip4s.Host.fromString(config.host).get)
       .withHttpApp(WebhookRoutes(service).routes.orNotFound)
       .build
 
-  def makeClient = EmberClientBuilder.default[IO].build
+  def makeServer2(config: EmberConfig, service: EventService[IO]): Resource[IO, Server] =
+    EmberServerBuilder
+      .default[IO]
+      .withHost(config.host)
+      .withPort(config.port)
+      .withHttpApp(WebhookRoutes(service).routes.orNotFound)
+      .build
+
+  def makeClient: Resource[IO, Client[IO]] = EmberClientBuilder.default[IO].build
 
   private def init(pathOpt: Option[String]): Resource[IO, (ConsumerService[IO], Server)] = for {
     config        <- ConfigSource.default.loadF[IO, AppConfig].toResource
@@ -51,5 +60,9 @@ object MainApp extends IOApp.Simple {
     )
 
   override def run: IO[Unit] = init(None).use { case (service, server) => service.consumeEvent() }
+
+  import resources.*
+
+  MkHttpServer[IO] // .newEmber()
 
 }

@@ -215,3 +215,19 @@ println(time)
 ```
 
 Here, `currentTime` might be better defined with parentheses because it performs an action (getting the current time), but it's used without parentheses, which suggests it is a stable value
+
+
+>-- In PostgreSQL, timestamp comparisons are typically done with microsecond precision. However, the timestamp in your 
+-- query ('2024-07-05T15:42:17.055') only specifies millisecond precision.
+--
+-- When PostgreSQL compares a timestamp with microsecond precision to one with only millisecond precision, it 
+-- effectively treats the millisecond-precision timestamp as a range. In this case, '2024-07-05T15:42:17.055' is 
+-- interpreted as the range from '2024-07-05T15:42:17.055000' to '2024-07-05T15:42:17.055999'.
+--
+-- As a result, a row with created_at = '2024-07-05 15:42:17.055000' (or any microsecond value up to .055999) would be 
+-- considered greater than '2024-07-05T15:42:17.055' in this comparison.
+--
+-- This behavior can lead to unexpected results and is generally considered a quirk or potential pitfall when working 
+-- with PostgreSQL timestamps.
+CREATE DOMAIN timestamptz_ms AS TIMESTAMP(3) WITH TIME ZONE;
+CREATE DOMAIN timestamp_ms AS TIMESTAMP(3) WITHOUT TIME ZONE;

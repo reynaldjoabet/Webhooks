@@ -1,4 +1,4 @@
-package domain
+package http.requests
 
 import io.circe.Codec
 

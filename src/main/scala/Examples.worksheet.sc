@@ -221,7 +221,7 @@ val ports: Port.type = Port
 import pureconfig.generic.derivation.default.*
 case class ServerConfige(host: Host, port: Port) derives ConfigReader //Ordering
 
-val conf = ConfigSource.default.at("server").loadOrThrow[ServerConfige]
+val conf = ConfigSource.default.at("server-config").loadOrThrow[ServerConfige]
 
 conf.host
 
@@ -371,3 +371,29 @@ Tuple.fromProductTyped(toggle)
 val li = (2 to 7).toList.mkString(",")
 
 li
+
+// enum PostgresAutosaveSetting derives EnumConfigReader{
+//   case Always, Conservative, Never
+// }
+// enum DBConnectionType derives EnumConfigReader{
+//   case GCP, Standard
+// }
+
+sealed abstract class UnexpectedTopicException(topic: String)
+    extends Exception(s"unexpected topic [$topic]")
+
+private object UnexpectedTopicException {
+
+  def apply(topic: String): UnexpectedTopicException =
+    new UnexpectedTopicException(topic) {
+
+      override def toString: String =
+        s"fs2.kafka.UnexpectedTopicException: $getMessage"
+
+    }
+
+}
+
+UnexpectedTopicException("mytopic")
+
+Some(1, 23)
