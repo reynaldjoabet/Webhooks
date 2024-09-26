@@ -4,7 +4,6 @@ import cats.effect.kernel.Async
 import cats.effect.kernel.Resource
 import cats.effect.syntax.all.*
 import cats.syntax.all.*
-
 import domain.*
 import io.circe.syntax.*
 import org.http4s.*
@@ -33,15 +32,17 @@ trait EventService[F[_]] {
 //import org.http4s.implicits.uri
 //import org.http4s.syntax.all.uri
 import org.http4s.syntax.literals.uri
+import org.http4s.dsl.io.* 
 
 object EventService {
 
   def make[F[_]: Async: Logger](
     webhooks: WebhookRepo[F],
     client: Client[F]
-  ) = new EventService[F] {
-    val dsl = Http4sClientDsl[F]
-    import dsl._
+  ): F[EventService[F] & Http4sClientDsl[F]] = new EventService[F] with Http4sClientDsl[F] {
+  //  val dsl = Http4sClientDsl[F]
+  //   import dsl._
+    //object io extends Http4sClientDsl[IO], here F fixed to IO
     override def processEvent(event: Event): F[Unit] = {
       val eventType       = event.eventType
       val webhooksByEvent = webhooks.getAllByMsgType(eventType)
@@ -55,7 +56,9 @@ object EventService {
       }
 
     }
-
+   
+// import org.http4s.client.dsl.io.http4sHeadersDecoder
+// import org.http4s.client.dsl.io.http4sClientSyntaxMethod
     // /** Make a [[org.http4s.Request]] using this Method */
     // final def apply[A](body: A, uri: Uri, headers: Header.ToRaw*)(implicit w: EntityEncoder[F, A]
     // the body can be a UrlForm or a json

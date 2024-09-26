@@ -49,7 +49,7 @@ object Covariance1 {
 //  case class Cat(name: String) extends Animal
 
     // 1 If `List` is covariant (`List[+A]`), we can also pass a `List[Dog]` or `List[Cat]` to `printCount`, increasing the method's reusability.
-    def printCount(animalList: List[Animal]) = println(animalList.length)
+    private def printCount(animalList: List[Animal]) = println(animalList.length)
     printCount(List(Dog("tom"), Dog("kate")))
 
     // 2. Type Safety Variance annotations enforce type safety by ensuring that you can't mistakenly put the wrong type into a data structure.
@@ -88,9 +88,9 @@ object Covariance2 {
 
   }
 
-  val dogContainer                                       = new Container[Dog](Dog("Rex"))
-  val catContainer                                       = new Container[Cat](Cat("Whiskers"))
-  def printContainer(container: Container[Animal]): Unit = println(container.describe)
+  private val dogContainer                                       = new Container[Dog](Dog("Rex"))
+  private val catContainer                                       = new Container[Cat](Cat("Whiskers"))
+  private def printContainer(container: Container[Animal]): Unit = println(container.describe)
 
   printContainer(dogContainer)
   printContainer(catContainer)
@@ -111,8 +111,8 @@ object Contravariance {
 
     }
 
-    val animalPrinter: Printer[Animal]                    = new Printer[Animal]
-    def printSound(printer: Printer[Dog], dog: Dog): Unit = println(printer.print(dog))
+    private val animalPrinter: Printer[Animal]                    = new Printer[Animal]
+    private def printSound(printer: Printer[Dog], dog: Dog): Unit = println(printer.print(dog))
 
     printSound(animalPrinter, Dog())
 
@@ -120,7 +120,7 @@ object Contravariance {
 
   object Contravariance2 {
 
-    trait Function[-T, +R] {
+    private trait Function[-T, +R] {
       def apply(input: T): R
     }
 
@@ -135,18 +135,18 @@ object Contravariance {
 
       def asString: String
 
-      case class DetailedSound(private val s: String) extends Sound {
+      private case class DetailedSound(private val s: String) extends Sound {
         def asString: String = s"Sound is: $s"
       }
 
-      class AnimalSoundFunction extends Function[Animal, Sound] {
+      private class AnimalSoundFunction extends Function[Animal, Sound] {
         def apply(animal: Animal): Sound = DetailedSound(animal.sound)
       }
 
-      def useFunction(func: Function[Dog, Sound], dog: Dog): Sound = func.apply(dog)
+      private def useFunction(func: Function[Dog, Sound], dog: Dog): Sound = func.apply(dog)
 
-      val animalSoundFunc = new AnimalSoundFunction()
-      val result: Sound   = useFunction(animalSoundFunc, Dog())
+      private val animalSoundFunc = new AnimalSoundFunction()
+      private val result: Sound   = useFunction(animalSoundFunc, Dog())
 
       println(s"The sound is: ${result.asString}")
 

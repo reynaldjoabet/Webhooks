@@ -3,7 +3,6 @@ package http.routes
 import cats.effect.kernel.Async
 import cats.syntax.all.*
 
-import domain.*
 import http.requests.*
 import org.http4s.{EntityDecoder, HttpRoutes}
 import org.http4s.circe.jsonOf

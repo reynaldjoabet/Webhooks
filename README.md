@@ -231,3 +231,44 @@ Here, `currentTime` might be better defined with parentheses because it performs
 -- with PostgreSQL timestamps.
 CREATE DOMAIN timestamptz_ms AS TIMESTAMP(3) WITH TIME ZONE;
 CREATE DOMAIN timestamp_ms AS TIMESTAMP(3) WITHOUT TIME ZONE;
+
+
+
+
+```scala
+/** Summons first given matching one of the listed cases. E.g. in
+ *
+ *  ```scala
+ *  //{
+ *  type A
+ *  trait B
+ *  type C
+ *  inline def f = {
+ *  //}
+ *  given B with { }
+ *
+ *  summonFrom {
+ *    case given A => 1
+ *    case given B => 2
+ *    case given C => 3
+ *    case _ => 4
+ *  }
+ *  //{
+ *  }
+ *  //}
+ *  ```
+ *  the returned value would be `2`.
+ *  @syntax markdown
+ */
+transparent inline def summonFrom[T](f: Nothing => T): T =
+  error("Compiler bug: `summonFrom` was not evaluated by the compiler")
+
+```
+
+temurin jdk or corretto
+
+
+you can pass an instance of `EventService[F] & Http4sClientDsl[F]` to a function that expects an `EventService[F]`. The intersection type `EventService[F] & Http4sClientDsl[F]` means that the instance conforms to both `EventService[F]` and `Http4sClientDsl[F]`.
+
+
+kafka consumers have to pull messages from brokers

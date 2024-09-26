@@ -2,7 +2,6 @@ package config
 
 import scala.concurrent.duration.FiniteDuration
 
-import ciris.*
 import pureconfig.generic.derivation.default.*
 import pureconfig.ConfigReader
 
@@ -15,5 +14,6 @@ final case class KafkaConsumerConfig(
 ) derives ConfigReader
 
 object ConsumerConfig {
+  // ConfigReader.finiteDurationConfigReader
   // implicit val configReader: ConfigReader[ConsumerConfig] = deriveReader[ConsumerConfig]
 }

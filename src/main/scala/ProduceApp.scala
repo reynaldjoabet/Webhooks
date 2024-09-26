@@ -13,7 +13,7 @@ object ProduceApp extends IOApp.Simple {
 
   implicit private val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.getLogger[IO]
 
-  val events = List(Event("event1"), Event("event2"), Event("event3"))
+  private val events: List[Event] = List(Event("event1"), Event("event2"), Event("event3"))
 
   override def run: IO[Unit] =
     ConfigSource

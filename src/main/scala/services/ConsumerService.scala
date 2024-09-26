@@ -1,23 +1,15 @@
 package services
 
-import scala.collection.immutable.Stream.Cons
-import scala.concurrent.duration.DurationInt
-
-import cats.effect.kernel.Async
-import cats.effect.kernel.Resource
+import cats.effect.kernel.{Async, Resource}
 import cats.effect.syntax.all.*
 import cats.syntax.all.*
-import fs2.kafka.*
-import fs2.kafka.KafkaConsumer
-
 import config.KafkaConsumerConfig
 import domain.*
+import fs2.kafka.*
 import io.circe.jawn.decodeByteArray
-import io.circe.parser.*
-import org.http4s.circe.middleware.JsonDebugErrorHandler
-import org.http4s.circe.CirceEntityEncoder.circeEntityEncoder
-import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
+
+import scala.concurrent.duration.DurationInt
 
 trait ConsumerService[F[_]] {
   def consumeEvent(): F[Unit]

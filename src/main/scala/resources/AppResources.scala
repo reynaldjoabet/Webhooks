@@ -1,5 +1,7 @@
 package resources
 
+import scala.concurrent.duration.Duration
+
 import cats.effect.{Concurrent, IO, Resource}
 import cats.effect.kernel.*
 import cats.effect.std.Console
@@ -8,6 +10,8 @@ import cats.Monad
 import fs2.io.net.Network
 
 import config.*
+import org.http4s.client.Client
+import org.http4s.ember.client.EmberClientBuilder
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.SelfAwareStructuredLogger
@@ -84,5 +88,15 @@ object AppResources {
         max = c.max
       )
       .evalTap(checkPostgresConnection)
+
+  private def makeEmberClient[F[_]](
+    config: ClientConfig
+  )(using F: Async[F]): Resource[F, Client[F]] =
+    EmberClientBuilder
+      .default[F](using F, Network.forAsync[F])
+      .withMaxTotal(256 * 10)
+      .withTimeout(config.connectTimeout)
+      .withIdleConnectionTime(Duration.Inf)
+      .build
 
 }

@@ -7,6 +7,10 @@ import cats.syntax.all.*
 
 import domain.user.*
 import domain.user.{FullUser, User, UserCredentials}
+import org.http4s.server.staticcontent.FileService.Config
+import pureconfig.error.CannotConvert
+import pureconfig.ConfigReader
+import pureconfig.ConfigSource
 import skunk.~
 import skunk.codec
 //import skunk.*

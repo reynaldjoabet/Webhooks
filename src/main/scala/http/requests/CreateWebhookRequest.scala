@@ -1,4 +1,5 @@
-package http.requests
+package http
+package requests
 
 import io.circe.Codec
 

@@ -1,4 +1,3 @@
-import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -16,6 +15,7 @@ import org.typelevel.twiddles.syntax.*
 import pureconfig.error.CannotParse
 import pureconfig.error.ConfigReaderException
 import pureconfig.error.FailureReason
+import pureconfig.generic.derivation.default.*
 import skunk.codec.all.*
 import skunk.syntax.all.*
 import skunk.AppliedFragment
@@ -218,15 +218,15 @@ val falsee: false = constValue[false]
 val ports: Port.type = Port
 
 //val portss:Port.type=constValue[]
-import pureconfig.generic.derivation.default.*
+
 case class ServerConfige(host: Host, port: Port) derives ConfigReader //Ordering
 
-val conf = ConfigSource.default.at("server-config").loadOrThrow[ServerConfige]
+// val conf = ConfigSource.default.at("server-config").loadOrThrow[ServerConfige]
 
-conf.host
+// conf.host
 
-conf._2
-conf.port
+// conf._2
+// conf.port
 
 //The inline keyword is an instruction for the compiler to copy the code from the definition site and to compile it at the caller site.
 
@@ -397,3 +397,131 @@ private object UnexpectedTopicException {
 UnexpectedTopicException("mytopic")
 
 Some(1, 23)
+
+ConfigSource.default.at("consumer-config").loadOrThrow[KafkaConsumerConfig]
+
+ConfigSource.default.at("producer-config").loadOrThrow[KafkaProducerConfig]
+
+ConfigSource.default.load[ServerConfig]
+
+ConfigSource.default.at("ember-config").load[EmberConfig]
+
+ConfigSource.default.at("security-config").load[SecurityConfig]
+
+val appconfig = ConfigSource.default.loadOrThrow[AppConfig]
+
+appconfig.producerConfig
+
+val appsetting: EtlConfig = ConfigSource.default.loadOrThrow[EtlConfig]
+
+appsetting
+
+//After that, you can derive `ConfigReader` instances for your config class using a `derives` clause:
+
+sealed trait AnimalConf derives ConfigReader
+case class DogConf(age: Int)         extends AnimalConf
+case class BirdConf(canFly: Boolean) extends AnimalConf
+
+ConfigSource.string("{ type: dog-conf, age: 4 }").load[AnimalConf]
+
+//Readers for enumerations of objects can also be derived by using `EnumConfigReader` instead:
+import pureconfig.generic.derivation.EnumConfigReader
+
+enum Season derives EnumConfigReader {
+  case Spring, Summer, Autumn, Winter
+}
+
+case class MyConf(list: List[Season]) derives ConfigReader
+
+ConfigSource.string("{ list: [spring, summer, autumn, winter] }").load[MyConf]
+
+final case class AuthenticationException(message: String) extends Exception(message)
+
+AuthenticationException("an error occured").toString()
+
+ConfigSource.defaultReference.loadOrThrow[EtlConfig]
+
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
+import scala.concurrent.duration.*
+import scala.concurrent.duration.FiniteDuration
+
+import pureconfig.generic.derivation.default.*
+
+object configs {
+  case class ServiceConfig(application: ApplicationConfig) derives ConfigReader
+
+  case class ApplicationConfig(
+    port: Int,
+    db: DBConnectionConfig,
+    heartbeatPeriod: FiniteDuration
+  )
+
+  case class DBConnectionConfig(
+    connectionType: DBConnectionType,
+    host: String,
+    dbName: String,
+    port: Int,
+    user: String,
+    password: Option[String],
+    cloudSqlInstance: Option[String],
+    autosave: Option[PostgresAutosaveSetting],
+    connectionPoolSize: Int
+  ) {
+    val toConnectionParameters = {
+      val dbNameEncoded = URLEncoder.encode(dbName, StandardCharsets.UTF_8.toString)
+      val cloudSqlInstanceParameter =
+        cloudSqlInstance
+          .map(URLEncoder.encode(_, StandardCharsets.UTF_8))
+          .map(parameter => s"cloudSqlInstance=$parameter&")
+          .getOrElse("")
+      val autosaveParameter = autosave
+        .map(parameter => s"autosave=${parameter.toString.toLowerCase}&")
+        .getOrElse("")
+      val connectionTypeParameters =
+        if connectionType == DBConnectionType.GCP then
+          s"socketFactory=com.google.cloud.sql.postgres.SocketFactory&" +
+            s"enableIamAuth=true&" +
+            s"sslmode=disable"
+        else ""
+
+      val url =
+        s"jdbc:postgresql://$host:$port/$dbNameEncoded?$autosaveParameter$cloudSqlInstanceParameter$connectionTypeParameters"
+
+      DBConnectionParameters(url, user, password, connectionPoolSize)
+    }
+  }
+
+  case class DBConnectionParameters(
+    url: String,
+    user: String,
+    password: Option[String],
+    connectionPoolSize: Int
+  )
+
+  enum PostgresAutosaveSetting derives EnumConfigReader {
+    case Always, Conservative, Never
+  }
+
+  enum DBConnectionType derives EnumConfigReader {
+    case GCP, Standard
+  }
+
+}
+import configs.*
+
+ConfigReader.durationConfigReader
+ConfigSource.default.at("client").loadOrThrow[ClientConfig]
+
+
+
+//val h:Int & String=1 // does not work
+
+def myint(j:Int)=9
+
+//myint("a string")
+
+
+
+

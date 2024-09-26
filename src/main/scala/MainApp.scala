@@ -22,7 +22,7 @@ object MainApp extends IOApp.Simple {
 
   implicit private val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.getLogger[IO]
 
-  def makeServer(config: ServerConfig, service: EventService[IO]): Resource[IO, Server] =
+  private def makeServer(config: ServerConfig, service: EventService[IO]): Resource[IO, Server] =
     EmberServerBuilder
       .default[IO]
       // .withPort(ip4s.Port.fromInt(config.port).getOrElse(ip4s.port"8080"))
@@ -39,7 +39,7 @@ object MainApp extends IOApp.Simple {
       .withHttpApp(WebhookRoutes(service).routes.orNotFound)
       .build
 
-  def makeClient: Resource[IO, Client[IO]] = EmberClientBuilder.default[IO].build
+  private def makeClient: Resource[IO, Client[IO]] = EmberClientBuilder.default[IO].build
 
   private def init(pathOpt: Option[String]): Resource[IO, (ConsumerService[IO], Server)] = for {
     config        <- ConfigSource.default.loadF[IO, AppConfig].toResource

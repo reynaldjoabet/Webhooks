@@ -108,8 +108,13 @@ val root = project
     )
   )
 
-ThisBuild / semanticdbEnabled := true
+//ThisBuild / semanticdbEnabled := true
 
 ThisBuild / usePipelining := true
 
 Compile / run / fork := true
+
+scalacOptions ++= Seq(
+  "-Xmax-inlines",
+  "150" // Increase the inline limit to 100
+)
